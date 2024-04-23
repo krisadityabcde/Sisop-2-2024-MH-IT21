@@ -111,6 +111,21 @@ void bunuhBiasa() {
         }
         fclose(file);
     }
+    FILE *file = fopen(FILENAME_KONFIG, "r");
+    if (file != NULL) {
+        int jumlahApp;
+        fscanf(file, "%d", &jumlahApp);
+        printf("%d", jumlahApp);
+        for (int i = 0; i < jumlahApp; i++) {
+            int pid;
+            fscanf(file, "%d", &pid);
+            printf(" = %d, ", pid);
+            if (kill(pid, SIGTERM) == -1) {
+                perror("Error killing process");
+            }
+        }
+        fclose(file);
+    }
 }
 
 // Fungsi untuk membaca file konfigurasi
