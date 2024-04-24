@@ -1,115 +1,167 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <time.h>
-#include <sys/wait.h> 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <signal.h> 
 
-#define LOG_PATH "./logs/"
-#define LOG_FORMAT "[%02d:%02d:%04d]-[%02d:%02d:%02d]-%d-%s_%s\n"
 
-volatile sig_atomic_t running = 1;
+#define MAX_LINE_LENGTH 256
 
-void signal_handler(int sig) {
-    running = 0;
-}
+void monitorProcess(int monitorMode, const char* user) {
+  char cmd[MAX_LINE_LENGTH];
+  FILE* ps_output;
+  char line[MAX_LINE_LENGTH];
+  char comm[MAX_LINE_LENGTH];
+  char log_filename[MAX_LINE_LENGTH];
+  FILE* log_file;
+  int pid_process;
 
-void log_activity(const char *user, const char *process, int pid, const char *status) {
-    time_t t = time(NULL);
-    struct tm tm = *localtime(&t);
-    char filename[256];
-    sprintf(filename, "%s%s.log", LOG_PATH, user);
-    FILE *file = fopen(filename, "a");
-    if (file) {
-        fprintf(file, "[%02d:%02d:%04d]-[%02d:%02d:%02d]-%d-%s_%s\n",
-                tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
-                tm.tm_hour, tm.tm_min, tm.tm_sec, 
-                getpid(), process, status);
-        fclose(file);
-    } else {
-        perror("Error opening log file");
+  // Mengambil pid dan nama proses
+  snprintf(cmd, sizeof(cmd), "ps -u %s -o pid,comm | awk 'NR>1 {print $1, $2}'", user);
+  ps_output = popen(cmd, "r");
+  if (ps_output == NULL) {
+    perror("Failed to open pipe");
+    exit(EXIT_FAILURE);
     }
-}
 
-void monitor_user(const char *user) {
-    pid_t pid = fork();
-    if (pid < 0) exit(EXIT_FAILURE);
-    if (pid > 0) exit(EXIT_SUCCESS);
-    if (setsid() < 0) exit(EXIT_FAILURE);
+  // Buka log file
+  snprintf(log_filename, sizeof(log_filename), "%s.log", user);
+  log_file = fopen(log_filename, "a");
+  if (log_file == NULL) {
+    perror("Failed to open log file");
+    exit(EXIT_FAILURE);
+    }
 
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
+  // Baca output dari ps per baris
+  while (fgets(line, sizeof(line), ps_output) != NULL) {
+    // Parsing baris untuk mendapatkan PID dan nama proses
+    if (sscanf(line, "%d %s", &pid_process, comm) != 2) {
+      fprintf(stderr, "Failed to parse line: %s", line);
+      continue;
+      }
 
-    pid = fork();
-    if (pid < 0) exit(EXIT_FAILURE);
-    if (pid > 0) exit(EXIT_SUCCESS);
+    // Mendapatkan waktu saat ini
+    time_t now;
+    struct tm* local_time;
+    char timestamp[30];
+    time(&now);
+    local_time = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "[%d:%m:%Y]-[%H:%M:%S]", local_time);
 
-    umask(0);
-    chdir("/");
-
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
-
-    while (running) {
-        pid_t child_pid = fork();
-        if (child_pid == 0) {
-            const char *args[] = {"ps", "-u", user, NULL};
-            execvp("ps", (char *const *)args);
-            exit(EXIT_FAILURE);
-        } else {
-            int status;
-            waitpid(child_pid, &status, 0);
+    // Format data dan simpan ke log file
+    if (monitorMode == 1) {
+      fprintf(log_file, "%s-%d-%s_JALAN\n", timestamp, pid_process, comm);
+      }
+    else if (monitorMode == 2) {
+      // Pastikan untuk gunakan user root untuk menjalankan program `su root`
+      int result = kill(pid_process, SIGTERM);
+      if (result == 0) {
+        fprintf(log_file, "%s-%d-%s_GAGAL\n", timestamp, pid_process, comm);
         }
-        sleep(1);
-    }
-}
-
-void control_user(const char *user, int enable) {
-    while (running) {
-        pid_t child_pid = fork();
-        if (child_pid == 0) {
-            const char *args[] = {"pkill", "-u", user, NULL};
-            execvp("pkill", (char *const *)args);
-            exit(EXIT_FAILURE)
-        } else {
-            int status;
-            waitpid(child_pid, &status, 0); 
+      else {
+        perror("kill");
+        fprintf(log_file, "GAGAL DI KILL%d-%s_\n", pid_process, comm);
+        exit(EXIT_FAILURE);
         }
-        sleep(1);
-    }
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Usage: %s <option> <user>\n", argv[0]);
-        printf("Options:\n");
-        printf("  -m : Start monitoring user's processes\n");
-        printf("  -s : Stop monitoring user's processes\n");
-        printf("  -c : Control user's processes\n");
-        printf("  -a : Release control on user's processes\n");
-        return 1;
+      }
     }
 
-    char *option = argv[1];
-    char *user = argv[2];
+  // Tutup pipe dan log file
+  pclose(ps_output);
+  fclose(log_file);
+  }
 
-    if (strcmp(option, "-m") == 0) {
-        monitor_user(user);
-    } else if (strcmp(option, "-s") == 0) {
-        printf("Monitoring stopped for user %s\n", user);
-    } else if (strcmp(option, "-c") == 0) {
-        control_user(user, 1);
-    } else if (strcmp(option, "-a") == 0) {
-        control_user(user, 0);
-    } else {
-        printf("Invalid option\n");
-        return 1;
+int main(int argc, char* argv[]) {
+  char process_name[MAX_LINE_LENGTH];
+  pid_t pid, sid;
+
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s <username> | -m <username> | -s <username> | -c <username> | -a <username>\n", argv[0]);
+    exit(EXIT_FAILURE);
     }
 
-    return 0;
-}
+  int monitorMode = 0;
+  char* user = argv[1];
+
+  if (argc == 2) {
+    char* args[] = { "ps", "-u", user, NULL };
+    execvp(args[0], args);
+    perror("execvp failed");
+
+    return 1;
+    }
+
+  if (argc == 2 && strcmp(argv[1], "-m") == 0) {
+    fprintf(stderr, "Usage: %s -m <username>\n", argv[0]);
+    exit(EXIT_FAILURE);
+    }
+
+  pid = fork(); // Menyimpan PID dari Child Process
+
+  /* Keluar saat fork gagal
+  * (nilai variabel pid < 0) */
+  if (pid < 0) {
+    fprintf(stderr, "gagal membuat fork");
+    exit(EXIT_FAILURE);
+    }
+
+  /* Keluar saat fork berhasil
+  * (nilai variabel pid adalah PID dari child process) */
+  if (pid > 0) {
+    exit(EXIT_SUCCESS);
+    }
+
+  umask(0);
+
+  sid = setsid();
+  if (sid < 0) {
+    exit(EXIT_FAILURE);
+    }
+
+  if (argc == 3 && strcmp(argv[1], "-m") == 0) {
+    fprintf(stderr, "Memulai proses monitoring user %s", argv[2]);
+    monitorMode = 1;
+    user = argv[2];
+    }
+
+  if (argc == 3 && strcmp(argv[1], "-s") == 0) {
+    snprintf(process_name, sizeof(process_name), "%s -m %s", argv[0], argv[2]);
+    char* args[] = { "pkill", "-f", process_name, NULL };
+    execvp(args[0], args);
+    perror("execvp failed");
+    return 1;
+    }
+
+  if (argc == 3 && strcmp(argv[1], "-c") == 0) {
+    fprintf(stderr, "Memulai proses gagalkan monitoring user %s", argv[2]);
+    monitorMode = 2;
+    user = argv[2];
+    }
+
+  if (argc == 3 && strcmp(argv[1], "-a") == 0) {
+    snprintf(process_name, sizeof(process_name), "%s -c %s", argv[0], argv[2]);
+    char* args[] = { "pkill", "-f", process_name, NULL };
+    execvp(args[0], args);
+    perror("execvp failed");
+    return 1;
+    }
+
+  close(STDIN_FILENO);
+  close(STDOUT_FILENO);
+  close(STDERR_FILENO);
+
+  while (1) {
+    if (monitorMode == 1 || monitorMode == 2) {
+      monitorProcess(monitorMode, user);
+      }
+
+    sleep(1);
+    }
+
+  exit(EXIT_SUCCESS);
+  return 0;
+  }
