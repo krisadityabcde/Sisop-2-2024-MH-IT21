@@ -527,7 +527,7 @@ Jika argc menemukan bahwa hanya ada 2 kata dari argumen yang diberikan , maka ot
 ### 3c
 Program dapat memantau proses apa saja yang dilakukan oleh user. Fitur ini membuat program berjalan secara daemon dan berjalan terus menerus. Untuk menjalankan fitur ini menggunakan command: 
 
-**./admin -m <user>**
+**./admin -m \<user\>**
 
 ```c
   if (argc == 3 && strcmp(argv[1], "-m") == 0) {
@@ -630,13 +630,13 @@ Dan pada soal yang sama untuk mematikan fitur tersebut menggunakan:
     }
 ```
 
-Dengan konsep yang sama, c
+Dengan konsep yang sama, setelah mendapatkan argument vector sesuai dengan ketentuan, fitur kemudian akan dimatikan menggunakan syntax `pkill()` yang dijalankan dengan `execvp()`
 
-Program akan mencatat seluruh proses yang dijalankan oleh user di file <user>.log dengan format:
+Program akan mencatat seluruh proses yang dijalankan oleh user di file \<user\>.log dengan format:
 
 **[dd:mm:yyyy]-[hh:mm:ss]_pid-process_nama-process_GAGAL/JALAN**
 
-Hl ini sudah dijelaskan sebelumnya pada function `monitorProcess()` di bagian membuat log.
+Hal ini sudah dijelaskan sebelumnya pada function `monitorProcess()` di bagian membuat log.
 
 ### 3d
 Program dapat menggagalkan proses yang dijalankan user setiap detik secara terus menerus dengan menjalankan: 
