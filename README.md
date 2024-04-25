@@ -165,7 +165,14 @@ Untuk membuat log saya menggunakan function tambahan `buatlog()` yang mana funct
 ```
 
 ### Screenshot Hasil Pengerjaan
-**Nanti**
+
+![Screenshot 2024-04-25 225207](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/09ad91dd-f64c-4afb-871d-8e6e0ab876c9)
+
+![Screenshot 2024-04-25 225156](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/2bd3fd1b-189a-4aa8-9a97-e6d5fcb74f11)
+
+![Screenshot 2024-04-25 225140](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/87c4c708-e01b-4552-8e53-ef85b0be2b94)
+
+![Screenshot 2024-04-25 225218](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/5a944811-38e6-4dc5-b0ed-e3c113c4cbdb)
 
 ### Kendala
 Tidak ada kendala
@@ -492,7 +499,12 @@ void buatLog(char *username, char *filename, char *action)
 Function ini adalah function untuk membuat file log. Dan untuk menjalankan program tiap detik saya menggunakan `sleep(1)` di dalam while loop pada main function.
 
 ### Screenshot Hasil Pengerjaan
-**Nanti**
+![Screenshot 2024-04-25 225652](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/f119cb25-ee79-4b82-b333-8a1696cc5f1a)
+
+![Screenshot 2024-04-25 225717](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/497dd8af-ed81-435f-8779-9b5cfaee4de1)
+
+![Screenshot 2024-04-25 225505](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/1413f8a0-6320-4133-9d0f-539076289709)
+
 
 ### Kendala
 Karena waktu pengerjaan yang kurang, maka saya hanya bisa mengerjakan hingga function untuk melakukan backup saja, sementara mulai dari restore hingga akhir file belum sempat dikerjakan.
@@ -675,7 +687,17 @@ Ketika proses yang dijalankan user digagalkan, program juga akan melog dan mense
 Hal ini sudah dijelaskan sebelumnya pada function `monitorProcess()` untuk bagian membuat log.
 
 ### Screenshot Hasil Pengerjaan
-**Nanti**
+![Screenshot 2024-04-25 224554](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/b259b465-a6c9-42f0-b1d0-b4e0d080f790)
+
+![Screenshot 2024-04-25 224922](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/fda48071-60c5-4b68-be0f-fe94a7cdfa20)
+
+![Screenshot 2024-04-25 224818](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/535924c3-a4e5-43f8-bf2f-0aeeae5ff508)
+
+![Screenshot 2024-04-25 224746](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/2df79ebd-085c-450e-9f68-6c051f311f8f)
+
+![Screenshot 2024-04-25 224704](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/1dbc91d9-1710-4a88-b21c-c1d5485d4702)
+
+![Screenshot 2024-04-25 224642](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/8d78b676-3e0b-446e-aefc-db1f094f1c53)
 
 ### Kendala
 Karena waktu pengerjaan yang kurang, awalnya saya hanya bisa mengerjakan hingga poin soal b
@@ -913,11 +935,14 @@ void bunuhDariKonfig() {
 Untuk mematikan aplikasi yang khusus dihidupkan dengan file konfigurasi, maka cukup dengan menginisialisasi dari file yang menyimpan PID khusus konfig, sehingga hanya aplikasi yang dihidupkan dengan file konfigurasi yang akan dimatikan.
 
 ### Screenshot Hasil Pengerjaan
-**Nanti**
+![Screenshot 2024-04-25 233317](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/da86ce44-9cc8-4b3c-bccb-a52eb0df34ec)
+
+![Screenshot 2024-04-25 233302](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/99c6bfaf-3c8b-48d6-8b7a-ee3e0b0f1dea)
+
+![Screenshot 2024-04-25 233105](https://github.com/krisadityabcde/Sisop-2-2024-MH-IT21/assets/144150187/0eb07d99-2f29-4229-a9f4-beea0134c40a)
 
 ### Kendala
 Karena waktu pengerjaan yang kurang, awalnya saya hanya bisa mengerjakan poin soal b, duraan itupun hanya bisa dilakukan tanpa otomatisasi. Maksudnya, untuk menginisialisasi sebuah window harus diubah konfigurasinya di dalam kode.
 
 ### Revisi
 Asisten meminta untuk melengkapi kode hingga selesai.
-
